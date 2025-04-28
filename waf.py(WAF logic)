@@ -1,0 +1,22 @@
+import re
+from flask import request, abort
+from config import patterns  # Import patterns from config.py
+
+# Middleware to inspect requests
+def check_request():
+    # Check request data for malicious patterns
+    for pattern in patterns:
+        if re.search(pattern, request.data.decode('utf-8', 'ignore'), re.IGNORECASE):
+            abort(400, description="Malicious content detected in request body.")
+
+    # Check query parameters for malicious patterns
+    for pattern in patterns:
+        for key, value in request.args.items():
+            if re.search(pattern, value, re.IGNORECASE):
+                abort(400, description="Malicious content detected in query parameters.")
+
+    # Check form data for malicious patterns
+    for pattern in patterns:
+        for key, value in request.form.items():
+            if re.search(pattern, value, re.IGNORECASE):
+                abort(400, description="Malicious content detected in form data.")
